@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import linkedy.com.github.cm.excecao.ExplosaoException;
+
 public class Tabuleiro {
 	private int linhas;
 	private int colunas;
@@ -23,12 +25,17 @@ public class Tabuleiro {
 	}
 	
 	public void abrir(int linha, int coluna) {
-		campos.parallelStream().filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
-			.findFirst().ifPresent(c -> c.abrir());;
+		try {
+			campos.parallelStream().filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
+				.findFirst().ifPresent(c -> c.abrir());
+		} catch (ExplosaoException e) {
+			campos.forEach(c -> c.setAberto(true));;
+			throw e;
+		}
 	}
 	public void alternarMarcacao(int linha, int coluna) {
 		campos.parallelStream().filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
-			.findFirst().ifPresent(c -> c.alternarMarcacao());;
+			.findFirst().ifPresent(c -> c.alternarMarcacao());
 	}
 
 	private void gerarCampos() {
@@ -52,9 +59,9 @@ public class Tabuleiro {
 		Predicate<Campo> minado = c -> c.isMinado();
 		
 		while (minasArmadas < minas) {
-			minasArmadas = campos.stream().filter(minado).count();
 			int aleatorio = (int) (Math.random() * campos.size());
 			campos.get(aleatorio).minar();
+			minasArmadas = campos.stream().filter(minado).count();
 		}
 	}
 	
@@ -70,7 +77,18 @@ public class Tabuleiro {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		int n = 0;
+		sb.append("    ");
+		for (int j = 0; j < colunas; j++) {
+			sb.append(" ");
+			sb.append(j);
+			sb.append(" ");
+		}
+		sb.append("\n\n");
 		for (int i = 0; i < linhas; i++) {
+			sb.append(" ");
+			sb.append(i + " ");
+			sb.append(" ");
+			
 			for (int j = 0; j < colunas; j++) {
 				sb.append(" ");
 				sb.append(campos.get(n));
