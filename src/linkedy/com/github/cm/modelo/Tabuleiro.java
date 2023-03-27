@@ -2,6 +2,7 @@ package linkedy.com.github.cm.modelo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class Tabuleiro {
@@ -50,11 +51,11 @@ public class Tabuleiro {
 		long minasArmadas = 0;
 		Predicate<Campo> minado = c -> c.isMinado();
 		
-		do {
+		while (minasArmadas < minas) {
 			minasArmadas = campos.stream().filter(minado).count();
 			int aleatorio = (int) (Math.random() * campos.size());
 			campos.get(aleatorio).minar();
-		} while (minasArmadas < minas);
+		}
 	}
 	
 	public boolean objetivoAlcancado() {
@@ -79,5 +80,10 @@ public class Tabuleiro {
 			sb.append("\n");
 		}
 		return sb.toString();
+	}
+	
+	public Campo getCampo(int linha, int coluna) {
+		return campos.parallelStream().filter(c -> c.getLinha() == linha && c.getColuna() == coluna)
+				.findFirst().get();
 	}
 }
